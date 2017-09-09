@@ -3,9 +3,10 @@
     "description": "Subscribe to Aliway keywords./订阅阿里味关键词",
     "manifest_version": 2,
     "short_name": "aliway_monitor",
-    "version": "0.0.1",
+    "version": "0.1.1",
     "author": "lxiange",
     "permissions": [
+        "storage",
         "cookies",
         "contextMenus",
         "http://www.aliway.com/*",
@@ -13,8 +14,10 @@
         "https://oapi.dingtalk.com/*"
     ],
     "background": {
-        "page": "index.html"
-      },
+        "scripts": [
+            "background.js"
+        ]
+    },
     "content_security_policy": "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' https://at.alicdn.com/; connect-src *",
     "browser_action": {
         "default_title": "aliway monitor",

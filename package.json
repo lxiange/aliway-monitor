@@ -1,6 +1,6 @@
 {
     "name": "aliway-monitor",
-    "version": "0.0.1",
+    "version": "0.1.1",
     "entry": {
         "index": "./src/index.jsx"
     },
