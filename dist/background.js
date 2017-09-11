@@ -76,7 +76,7 @@ const AliwayUtils = {
       body: JSON.stringify({
         feedCard: {
           links: // todo: add pic
-          [{ title: '您有新的订阅消息啦~' }].concat(data.map((item) => {
+          [{ title: '您有新的订阅消息啦~', picURL: 'https://www.aliway.com/images/aliway/index/120201/index_logo.png' }].concat(data.map((item) => {
             return { title: item.postTitle, messageURL: item.postUrl };
           })),
         },
@@ -89,7 +89,8 @@ const AliwayUtils = {
     if (intervalId) {
       console.error('job is running!');
     } else {
-      intervalId = setInterval(AliwayUtils.checkUpdate, AliwayUtils.configParams.refreshInterval);
+      intervalId = setInterval(AliwayUtils.checkUpdate,
+        AliwayUtils.configParams.refreshInterval * 1000);
     }
   },
   stop: () => {
