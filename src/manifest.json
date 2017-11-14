@@ -3,7 +3,7 @@
     "description": "Subscribe to Aliway keywords./订阅阿里味关键词",
     "manifest_version": 2,
     "short_name": "aliway_monitor",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "author": "lxiange",
     "permissions": [
         "storage",

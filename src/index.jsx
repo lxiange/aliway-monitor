@@ -3,14 +3,13 @@ import { Col, Row, InputNumber, Input, Checkbox, Button, Tag, Tooltip } from 'an
 import ReactDOM from 'react-dom';
 
 const CheckboxGroup = Checkbox.Group;
-
+const console = window.console;
 const DING_WEBHOOK_PREFIX = 'https://oapi.dingtalk.com/robot/send?access_token=';
 
 
 const DEFAULT_CONFIG = {
   subKeys: ['盖楼', '票', '征友'],
   dingRobotWebHook: 'https://oapi.dingtalk.com/robot/send?access_token=d25126c6ed27c12c759b3e7619c13678a30f7968716b590edb02cfc7620c0c2b',
-  forumIds: [20, 17],
   refreshInterval: 10,
   isRunnig: false,
 };
@@ -56,6 +55,7 @@ class AliwayMonitor extends React.Component {
   updateConfig() {
     console.log('update config:', this.configParams);
     localStorage[CONFIG_KEY] = JSON.stringify(this.configParams);
+    chrome.runtime.sendMessage({ action: 'update' });
   }
 
   refreshIntervalOnChange = (value) => {
@@ -70,19 +70,13 @@ class AliwayMonitor extends React.Component {
     this.configParams.dingRobotWebHook = DING_WEBHOOK_PREFIX + value;
     this.updateConfig();
   }
-  forumIdsOnChange = (value) => {
-    this.setState({ forumIds: value });
-    this.configParams.forumIds = value;
-    this.updateConfig();
-  }
+
   isRunnigOnChange = () => {
     const isRunnig = this.state.isRunnig;
     if (isRunnig) {
-      // kill it
       console.log('send msg stop');
       chrome.runtime.sendMessage({ action: 'stop' });
     } else {
-      // start it
       console.log('send msg start');
       chrome.runtime.sendMessage({ action: 'start' });
     }
@@ -93,10 +87,8 @@ class AliwayMonitor extends React.Component {
 
 
   resetStatus = () => {
-    // todo:
     chrome.runtime.sendMessage({ action: 'stop' });
     localStorage[CONFIG_KEY] = JSON.stringify(DEFAULT_CONFIG);
-    // this.setState({ ...DEFAULT_CONFIG });
     window.close();
   }
 
@@ -138,25 +130,17 @@ class AliwayMonitor extends React.Component {
   };
 
   render() {
-    const forumOptions = [
-      { label: '精彩活动', value: 20 },
-      { label: '捣浆糊', value: 17 },
-      { label: '互帮互助', value: 73 },
-      { label: '阿里十派', value: 107 },
-      { label: '阿里廉正', value: 111 },
-    ];
-
     if (this.state.hasSession) {
       return (
         <div>
           <Row style={{ paddingTop: 5, paddingLeft: 5 }}>
             刷新间隔(秒)：
           <InputNumber
-            min={5}
-            max={24000}
-            defaultValue={this.state.refreshInterval}
-            onChange={this.refreshIntervalOnChange}
-          />
+              min={5}
+              max={24000}
+              defaultValue={this.state.refreshInterval}
+              onChange={this.refreshIntervalOnChange}
+            />
           </Row>
 
           <Row style={{ paddingTop: 5, paddingLeft: 5 }}>
@@ -197,15 +181,6 @@ class AliwayMonitor extends React.Component {
           </Row>
 
           <Row style={{ paddingTop: 5, paddingLeft: 5 }}>
-            订阅板块：
-          <CheckboxGroup
-            options={forumOptions}
-            onChange={this.forumIdsOnChange}
-            defaultValue={this.state.forumIds}
-          />
-          </Row>
-
-          <Row style={{ paddingTop: 5, paddingLeft: 5 }}>
             <Col span={8}>
               <Button type="primary" onClick={this.isRunnigOnChange}>
                 {this.state.isRunnig ? '停止' : '开始'}
@@ -219,7 +194,7 @@ class AliwayMonitor extends React.Component {
               <Button
                 onClick={this.resetStatus}
               >
-                clear
+                停止并恢复默认配置
             </Button>
             </Col>
           </Row>

@@ -4,58 +4,17 @@
 
 const pushedTids = new Set();
 const CONFIG_KEY = 'aliway_monitor_params';
+const ALIWAY_LATEST_POST_URL = 'https://www.aliway.com/mode.php?m=o&q=browse&tab=t';
 const console = window.console;
 
 let intervalId = null;
 const AliwayUtils = {
   refreshToSetCookie: () => {
-    window.document.getElementById('iframe1').src = 'https://www.aliway.com/mode.php?m=o&q=browse&tab=t';
+    window.document.getElementById('iframe1').src = ALIWAY_LATEST_POST_URL;
   },
 
-  // checkUpdate_old: () => {
-  //   Promise.all(AliwayUtils.configParams.forumIds.map((fid) => {
-  //     return fetch(`https://www.aliway.com/thread.php?fid=${fid}&orderway=postdate&asc=DESC&page=1`, {
-  //       method: 'get',
-  //       credentials: 'include',
-  //     }
-  //     ).then(resp => resp.arrayBuffer())
-  //       .then((ab) => {
-  //         const enc = new TextDecoder('gbk');
-  //         return enc.decode(ab);
-  //       })
-  //       .then((data) => {
-  //         const datas = [];
-  //         const parser = new DOMParser();
-  //         const dom = parser.parseFromString(data, 'text/html');
-  //         const subjects = dom.getElementsByClassName('subject');
-
-  //         Array.prototype.forEach.call(subjects,
-  //           (item) => {
-  //             const postUrl = item.href;
-  //             const postTitle = item.innerText;
-  //             const tid = postUrl.match(/tid=[0-9]+/)[0].substr(4);
-  //             AliwayUtils.configParams.subKeys.forEach((key) => {
-  //               if (postTitle.indexOf(key) !== -1 && !pushedTids.has(tid)) {
-  //                 datas.push({ postUrl: item.href, postTitle: item.innerText, fid, key });
-  //                 pushedTids.add(tid);
-  //               }
-  //             }
-  //             );
-  //           }
-  //         );
-  //         return datas;
-  //       }
-  //       );
-  //   })).then(item => item.reduce((x, y) => x.concat(y)))
-  //     .then((dataToPush) => {
-  //       if (dataToPush.length !== 0) {
-  //         AliwayUtils.pushToDingRobot(dataToPush, AliwayUtils.configParams.dingRobotWebHook);
-  //       }
-  //     });
-  // },
-
   checkUpdate: () => {
-    fetch('https://www.aliway.com/mode.php?m=o&q=browse&tab=t', {
+    fetch(ALIWAY_LATEST_POST_URL, {
       method: 'get',
       credentials: 'include',
     }
@@ -79,8 +38,6 @@ const AliwayUtils = {
         const postUrl = row.children[0].children[0].href;
         const postTitle = row.children[0].children[0].innerText;
         const tid = postUrl.match(/tid=[0-9]+/)[0].substr(4);
-
-        console.log(postTitle);
 
         AliwayUtils.configParams.subKeys.forEach((key) => {
           if (postTitle.indexOf(key) !== -1 && !pushedTids.has(tid)) {
@@ -157,6 +114,12 @@ const AliwayUtils = {
       console.error('no job is running!');
     }
   },
+  update: () => {
+    if (intervalId) {
+      AliwayUtils.stop();
+      AliwayUtils.start();
+    }
+  },
 };
 
 
@@ -170,8 +133,9 @@ function messageReceived(msg) {
     AliwayUtils.start();
   } else if (msg.action === 'stop') {
     AliwayUtils.stop();
+  } else if (msg.action === 'update') {
+    AliwayUtils.update();
   } else {
     console.error('unknown msg!');
   }
 }
-
