@@ -1,5 +1,5 @@
 node_modules/*
 .vscode/*
-dist/index.js
-dist/common.js
-dist/index.css
+dist/*
+.DS_Store
+package-lock.json

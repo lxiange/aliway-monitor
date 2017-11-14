@@ -11,7 +11,7 @@ const DEFAULT_CONFIG = {
   subKeys: ['盖楼', '票', '征友'],
   dingRobotWebHook: 'https://oapi.dingtalk.com/robot/send?access_token=d25126c6ed27c12c759b3e7619c13678a30f7968716b590edb02cfc7620c0c2b',
   forumIds: [20, 17],
-  refreshInterval: 3000,
+  refreshInterval: 10,
   isRunnig: false,
 };
 
@@ -121,12 +121,16 @@ class AliwayMonitor extends React.Component {
       inputVisible: false,
       inputValue: '',
     });
+    this.configParams.subKeys = subKeys;
+    this.updateConfig();
   }
 
   handleClose = (removedTag) => {
     const subKeys = this.state.subKeys.filter(tag => tag !== removedTag);
     console.log(subKeys);
     this.setState({ subKeys });
+    this.configParams.subKeys = subKeys;
+    this.updateConfig();
   }
 
   saveInputRef = (input) => {

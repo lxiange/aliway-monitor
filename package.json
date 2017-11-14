@@ -1,12 +1,12 @@
 {
     "name": "aliway-monitor",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "entry": {
         "index": "./src/index.jsx"
     },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 0",
-        "build": "atool-build src -o dist",
+        "build": "atool-build src -o dist && tnpm run copy",
+        "copy": "cp src/{background.js,background.html,index.html,manifest.json} dist/",
         "dev": "dora --port 8003 --plugins webpack"
     },
     "author": "lxiange",
