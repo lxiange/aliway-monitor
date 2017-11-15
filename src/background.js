@@ -6,6 +6,8 @@ const pushedTids = new Set();
 const CONFIG_KEY = 'aliway_monitor_params';
 const ALIWAY_LATEST_POST_URL = 'https://www.aliway.com/mode.php?m=o&q=browse&tab=t';
 const ALIWAY_ICON_URL = 'https://www.aliway.com/images/aliway/index/120201/index_logo.png';
+const EXTENSION_ICON = 'aliway.png';
+const NOTIFICATION_SOUND = '3.mp3';
 const console = window.console;
 
 let intervalId = null;
@@ -47,11 +49,12 @@ const AliwayUtils = {
           }
         });
       });
-      console.log(dataToPush);
       return dataToPush;
     })
       .then((dataToPush) => {
         if (dataToPush.length !== 0) {
+
+          console.log(dataToPush);
           if (AliwayUtils.configParams.enableDingRebot) {
             AliwayUtils.pushToDingRobot(dataToPush);
           }
@@ -82,7 +85,6 @@ const AliwayUtils = {
     if (data.length === 0) {
       return;
     }
-    console.log(data);
 
     fetch(webHookUrl, {
       method: 'post',
@@ -104,16 +106,19 @@ const AliwayUtils = {
   },
 
   pushToChromeNotifications: (data) => {
+    if (data.length === 0) {
+      return;
+    }
     data.forEach((item) => {
       const opt = {
         type: 'basic',
-        iconUrl: 'aliway.png',
+        iconUrl: EXTENSION_ICON,
         title: item.postTitle,
         message: item.postUrl,
       };
       chrome.notifications.create(item.postUrl, opt, () => {
         const myAudio = new window.Audio();
-        myAudio.src = '3.mp3';
+        myAudio.src = NOTIFICATION_SOUND;
         myAudio.play();
       });
     });

@@ -2,7 +2,7 @@
  * Copyright xiangge.lx (119726)
  */
 import React from 'react';
-import { Col, Row, InputNumber, Input, Button, Tag, Tooltip, Switch } from 'antd';
+import { Col, Row, InputNumber, Input, Button, Tag, Tooltip, Switch, Spin } from 'antd';
 import ReactDOM from 'react-dom';
 
 const console = window.console;
@@ -204,8 +204,10 @@ class AliwayMonitor extends React.Component {
               </Button>
             </Col>
             <Col span={8}>
-              运行状态：
-              <Button shape="circle" loading={this.state.isRunnig} disabled />
+              <div style={{ display: 'flex' }}>
+                <div>运行状态：</div>
+                {this.state.isRunnig ? <Spin size="large" /> : null}
+              </div>
             </Col>
             <Col span={8}>
               <Button
