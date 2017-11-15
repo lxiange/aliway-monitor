@@ -1,17 +1,20 @@
+/*
+ * Copyright xiangge.lx (119726)
+ */
 import React from 'react';
-import { Col, Row, InputNumber, Input, Checkbox, Button, Tag, Tooltip } from 'antd';
+import { Col, Row, InputNumber, Input, Button, Tag, Tooltip, Switch } from 'antd';
 import ReactDOM from 'react-dom';
 
-const CheckboxGroup = Checkbox.Group;
 const console = window.console;
 const DING_WEBHOOK_PREFIX = 'https://oapi.dingtalk.com/robot/send?access_token=';
 
 
 const DEFAULT_CONFIG = {
-  subKeys: ['盖楼', '票', '征友'],
+  subKeys: ['单身', '妹子', '征友'],
   dingRobotWebHook: 'https://oapi.dingtalk.com/robot/send?access_token=d25126c6ed27c12c759b3e7619c13678a30f7968716b590edb02cfc7620c0c2b',
   refreshInterval: 10,
   isRunnig: false,
+  enableDingRebot: false,
 };
 
 const CONFIG_KEY = 'aliway_monitor_params';
@@ -44,7 +47,6 @@ class AliwayMonitor extends React.Component {
         return enc.decode(ab);
       })
       .then((data) => {
-        console.log(data);
         if (data.indexOf('个人中心') !== -1) {
           this.setState({ hasSession: true });
         }
@@ -61,6 +63,12 @@ class AliwayMonitor extends React.Component {
   refreshIntervalOnChange = (value) => {
     this.setState({ refreshInterval: value });
     this.configParams.refreshInterval = value;
+    this.updateConfig();
+  }
+
+  pushMethodSwitchOnChange = (value) => {
+    this.setState({ enableDingRebot: value });
+    this.configParams.enableDingRebot = value;
     this.updateConfig();
   }
 
@@ -87,7 +95,7 @@ class AliwayMonitor extends React.Component {
 
 
   resetStatus = () => {
-    chrome.runtime.sendMessage({ action: 'stop' });
+    chrome.runtime.sendMessage({ action: 'reset' });
     localStorage[CONFIG_KEY] = JSON.stringify(DEFAULT_CONFIG);
     window.close();
   }
@@ -134,8 +142,8 @@ class AliwayMonitor extends React.Component {
       return (
         <div>
           <Row style={{ paddingTop: 5, paddingLeft: 5 }}>
-            刷新间隔(秒)：
-          <InputNumber
+            <div>刷新间隔(秒)，建议60秒以上：</div>
+            <InputNumber
               min={5}
               max={24000}
               defaultValue={this.state.refreshInterval}
@@ -143,16 +151,25 @@ class AliwayMonitor extends React.Component {
             />
           </Row>
 
-          <Row style={{ paddingTop: 5, paddingLeft: 5 }}>
-            钉钉webhook：
-          </Row>
-          <Row style={{ paddingTop: 5, paddingLeft: 5 }}>
-            <Input
-              addonBefore={DING_WEBHOOK_PREFIX}
-              onChange={this.dingRobotWebHookOnChange}
-              defaultValue={this.state.dingRobotWebHook.substr(DING_WEBHOOK_PREFIX.length)}
+          <Row>
+            <div>是否启用钉钉推送</div>
+            <Switch
+              defaultChecked={this.state.enableDingRebot}
+              onChange={this.pushMethodSwitchOnChange}
             />
           </Row>
+          {this.state.enableDingRebot && (<div>
+            <Row style={{ paddingTop: 5, paddingLeft: 5 }}>
+              钉钉webhook：
+              </Row>
+            <Row style={{ paddingTop: 5, paddingLeft: 5 }}>
+              <Input
+                addonBefore={DING_WEBHOOK_PREFIX}
+                onChange={this.dingRobotWebHookOnChange}
+                defaultValue={this.state.dingRobotWebHook.substr(DING_WEBHOOK_PREFIX.length)}
+              />
+            </Row>
+          </div>)}
 
           <Row style={{ paddingTop: 5, paddingLeft: 5 }}>
             订阅关键词：

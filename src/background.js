@@ -5,6 +5,7 @@
 const pushedTids = new Set();
 const CONFIG_KEY = 'aliway_monitor_params';
 const ALIWAY_LATEST_POST_URL = 'https://www.aliway.com/mode.php?m=o&q=browse&tab=t';
+const ALIWAY_ICON_URL = 'https://www.aliway.com/images/aliway/index/120201/index_logo.png';
 const console = window.console;
 
 let intervalId = null;
@@ -19,11 +20,11 @@ const AliwayUtils = {
       credentials: 'include',
     }
     ).then((resp) => {
-      console.log(resp.status);
       if (resp.status === 200) {
         return resp.arrayBuffer();
       } else {
         AliwayUtils.refreshToSetCookie();
+        console.error(resp.status);
         return;
       }
     }).then((ab) => {
@@ -51,12 +52,15 @@ const AliwayUtils = {
     })
       .then((dataToPush) => {
         if (dataToPush.length !== 0) {
-          AliwayUtils.pushToDingRobot(dataToPush, AliwayUtils.configParams.dingRobotWebHook);
+          if (AliwayUtils.configParams.enableDingRebot) {
+            AliwayUtils.pushToDingRobot(dataToPush);
+          }
+          AliwayUtils.pushToChromeNotifications(dataToPush);
         }
       })
       .catch((err) => {
-        AliwayUtils.refreshToSetCookie();
         console.error(err);
+        AliwayUtils.refreshToSetCookie();
       });
   },
 
@@ -64,7 +68,7 @@ const AliwayUtils = {
   data = [
           {
               postTitle:'hahachishi',
-              postUrl:'http://www.aliway.com/dsfaffd....',
+              postUrl:'https://www.aliway.com/read.php?fid=122&tid=384496',
               ...
           },
           {
@@ -73,13 +77,14 @@ const AliwayUtils = {
       ]
   */
 
-  pushToDingRobot: (data, webHook) => {
+  pushToDingRobot: (data) => {
+    const webHookUrl = AliwayUtils.configParams.dingRobotWebHook;
     if (data.length === 0) {
       return;
     }
     console.log(data);
 
-    fetch(webHook, {
+    fetch(webHookUrl, {
       method: 'post',
       headers: {
         'Access-Control-Allow-Origin': '*',
@@ -88,13 +93,29 @@ const AliwayUtils = {
       },
       body: JSON.stringify({
         feedCard: {
-          links: // todo: add pic
-            [{ title: '您有新的订阅消息啦~', picURL: 'https://www.aliway.com/images/aliway/index/120201/index_logo.png' }].concat(data.map((item) => {
+          links:
+            [{ title: '您有新的订阅消息啦~', picURL: ALIWAY_ICON_URL }].concat(data.map((item) => {
               return { title: item.postTitle, messageURL: item.postUrl };
             })),
         },
         msgtype: 'feedCard',
       }),
+    });
+  },
+
+  pushToChromeNotifications: (data) => {
+    data.forEach((item) => {
+      const opt = {
+        type: 'basic',
+        iconUrl: 'aliway.png',
+        title: item.postTitle,
+        message: item.postUrl,
+      };
+      chrome.notifications.create(item.postUrl, opt, () => {
+        const myAudio = new window.Audio();
+        myAudio.src = '3.mp3';
+        myAudio.play();
+      });
     });
   },
 
@@ -120,10 +141,15 @@ const AliwayUtils = {
       AliwayUtils.start();
     }
   },
+  reset: () => {
+    AliwayUtils.stop();
+    pushedTids.clear();
+  },
 };
 
 
 chrome.runtime.onMessage.addListener(messageReceived);
+chrome.notifications.onClicked.addListener(id => chrome.tabs.create({ url: id }));
 AliwayUtils.configParams = JSON.parse(localStorage[CONFIG_KEY]);
 
 function messageReceived(msg) {
@@ -135,6 +161,8 @@ function messageReceived(msg) {
     AliwayUtils.stop();
   } else if (msg.action === 'update') {
     AliwayUtils.update();
+  } else if (msg.action === 'reset') {
+    AliwayUtils.reset();
   } else {
     console.error('unknown msg!');
   }

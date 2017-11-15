@@ -3,12 +3,18 @@
     "description": "Subscribe to Aliway keywords./订阅阿里味关键词",
     "manifest_version": 2,
     "short_name": "aliway_monitor",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "author": "lxiange",
+    "icons": {
+        "16": "aliway.png",
+        "48": "aliway.png",
+        "128": "aliway.png"
+    },
     "permissions": [
         "storage",
         "cookies",
         "contextMenus",
+        "notifications",
         "http://www.aliway.com/*",
         "https://www.aliway.com/*",
         "https://oapi.dingtalk.com/*"
