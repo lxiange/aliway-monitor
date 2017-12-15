@@ -13,7 +13,7 @@ const DEFAULT_CONFIG = {
   subKeys: ['单身', '妹子', '征友'],
   dingRobotWebHook: 'https://oapi.dingtalk.com/robot/send?access_token=d25126c6ed27c12c759b3e7619c13678a30f7968716b590edb02cfc7620c0c2b',
   refreshInterval: 10,
-  isRunnig: false,
+  isRunning: false,
   enableDingRebot: false,
 };
 
@@ -52,6 +52,7 @@ class AliwayMonitor extends React.Component {
         }
       })
       .catch((x) => { console.log(x); this.setState({ hasSession: false }); });
+    chrome.runtime.sendMessage({ action: 'sync' });
   }
 
   updateConfig() {
@@ -79,17 +80,17 @@ class AliwayMonitor extends React.Component {
     this.updateConfig();
   }
 
-  isRunnigOnChange = () => {
-    const isRunnig = this.state.isRunnig;
-    if (isRunnig) {
+  isRunningOnChange = () => {
+    const isRunning = this.state.isRunning;
+    if (isRunning) {
       console.log('send msg stop');
       chrome.runtime.sendMessage({ action: 'stop' });
     } else {
       console.log('send msg start');
       chrome.runtime.sendMessage({ action: 'start' });
     }
-    this.setState({ isRunnig: !isRunnig });
-    this.configParams.isRunnig = !isRunnig;
+    this.setState({ isRunning: !isRunning });
+    this.configParams.isRunning = !isRunning;
     this.updateConfig();
   }
 
@@ -198,23 +199,26 @@ class AliwayMonitor extends React.Component {
           </Row>
 
           <Row style={{ paddingTop: 5, paddingLeft: 5 }}>
-            <Col span={8}>
-              <Button type="primary" onClick={this.isRunnigOnChange}>
-                {this.state.isRunnig ? '停止' : '开始'}
+            <Col span={6}>
+              <Button type="primary" onClick={this.isRunningOnChange}>
+                {this.state.isRunning ? '暂停' : '开始'}
               </Button>
             </Col>
-            <Col span={8}>
+            <Col span={6}>
               <div style={{ display: 'flex' }}>
                 <div>运行状态：</div>
-                {this.state.isRunnig ? <Spin size="large" /> : null}
+                {this.state.isRunning ? <Spin size="large" style={{ color: red }} /> : null}
               </div>
             </Col>
-            <Col span={8}>
+            <Col span={6}>
               <Button
                 onClick={this.resetStatus}
               >
                 停止并恢复默认配置
             </Button>
+            </Col>
+            <Col span={6}>
+              <a href="https://www.aliway.com/mode.php?m=o&q=browse&tab=t">查看最新帖子</a>
             </Col>
           </Row>
         </div >

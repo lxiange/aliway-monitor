@@ -128,6 +128,7 @@ const AliwayUtils = {
     if (intervalId) {
       console.error('job is running!');
     } else {
+      AliwayUtils.checkUpdate();
       intervalId = setInterval(AliwayUtils.checkUpdate,
         AliwayUtils.configParams.refreshInterval * 1000);
     }
@@ -150,6 +151,15 @@ const AliwayUtils = {
     AliwayUtils.stop();
     pushedTids.clear();
   },
+  sync: () => {
+    if (AliwayUtils.configParams.isRunning) {
+      if (!intervalId) {
+        AliwayUtils.start();
+      }
+    } else if (intervalId) {
+      AliwayUtils.stop();
+    }
+  },
 };
 
 
@@ -168,6 +178,8 @@ function messageReceived(msg) {
     AliwayUtils.update();
   } else if (msg.action === 'reset') {
     AliwayUtils.reset();
+  } else if (msg.action === 'sync') {
+    AliwayUtils.sync();
   } else {
     console.error('unknown msg!');
   }
