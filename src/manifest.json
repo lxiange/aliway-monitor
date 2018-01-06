@@ -23,9 +23,21 @@
         "page": "background.html",
         "persistent": true
     },
-    "content_security_policy": "default-src 'none'; frame-src *; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' https://at.alicdn.com/; connect-src *",
+    "content_security_policy": "default-src 'none'; frame-src *; script-src 'self'  https://www.gstatic.com/; style-src 'self' 'unsafe-inline'; font-src 'self' https://at.alicdn.com/; connect-src *",
     "browser_action": {
         "default_title": "aliway monitor",
         "default_popup": "index.html"
-    }
+    },
+    "content_scripts": [
+        {
+            "js": [
+                "content_script.js"
+            ],
+            "matches": [
+                "http://www.aliway.com/*",
+                "https://www.aliway.com/*"
+            ],
+            "run_at": "document_end"
+        }
+    ]
 }

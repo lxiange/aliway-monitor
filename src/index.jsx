@@ -15,6 +15,9 @@ const DEFAULT_CONFIG = {
   refreshInterval: 10,
   isRunning: false,
   enableDingRebot: false,
+  isFloorMonitorRunning: false,
+  floorMonitorTid: 0,
+  floorMonitorSuffix: 8,
 };
 
 const CONFIG_KEY = 'aliway_monitor_params';
@@ -37,7 +40,8 @@ class AliwayMonitor extends React.Component {
     console.log(this.state);
   }
 
-  componentDidMount() {
+  componentWillMount() {
+    chrome.runtime.sendMessage({ action: 'sync' });
     fetch('https://www.aliway.com/', {
       method: 'get',
       credentials: 'include',
@@ -52,7 +56,6 @@ class AliwayMonitor extends React.Component {
         }
       })
       .catch((x) => { console.log(x); this.setState({ hasSession: false }); });
-    chrome.runtime.sendMessage({ action: 'sync' });
   }
 
   updateConfig() {
@@ -91,6 +94,37 @@ class AliwayMonitor extends React.Component {
     }
     this.setState({ isRunning: !isRunning });
     this.configParams.isRunning = !isRunning;
+    this.updateConfig();
+  }
+
+  isFloorMonitorRunningOnChange = () => {
+    const isFloorMonitorRunning = this.state.isFloorMonitorRunning;
+    if (isFloorMonitorRunning) {
+      console.log('send msg stopMonitor');
+      chrome.runtime.sendMessage({ action: 'stopMonitor' });
+    } else {
+      console.log('send msg startMonitor');
+      chrome.runtime.sendMessage({
+        action: 'startMonitor',
+        tid: this.configParams.floorMonitorTid,
+        floorSuffix: this.configParams.floorMonitorSuffix,
+      });
+    }
+    this.setState({ isFloorMonitorRunning: !isFloorMonitorRunning });
+    this.configParams.isFloorMonitorRunning = !isFloorMonitorRunning;
+    this.updateConfig();
+  }
+
+  floorMonitorTidOnChange = (e) => {
+    const value = e.target.value;
+    this.setState({ floorMonitorTid: value });
+    this.configParams.floorMonitorTid = value;
+    this.updateConfig();
+  }
+
+  floorMonitorSuffixOnChange = (value) => {
+    this.setState({ floorMonitorSuffix: value });
+    this.configParams.floorMonitorSuffix = value;
     this.updateConfig();
   }
 
@@ -197,28 +231,58 @@ class AliwayMonitor extends React.Component {
             )}
             {!this.state.inputVisible && <Button size="small" type="dashed" onClick={this.showInput}>+ New Tag</Button>}
           </Row>
+          <Row>
+            <Col span={7}>
+              <div>是否抢楼</div>
+              <Switch
+                defaultChecked={this.state.isFloorMonitorRunning}
+                onChange={this.isFloorMonitorRunningOnChange}
+              />
+            </Col>
+            <Col span={2}>
+              <div>抢楼tid:</div>
+              <Input
+                defaultValue={this.state.floorMonitorTid}
+                onChange={this.floorMonitorTidOnChange}
+              />
+            </Col>
+            <Col span={7} offset={5}>
+              <div>抢楼尾数:</div>
+              <InputNumber
+                defaultValue={this.state.floorMonitorSuffix}
+                onChange={this.floorMonitorSuffixOnChange}
+              />
+            </Col>
+          </Row>
 
           <Row style={{ paddingTop: 5, paddingLeft: 5 }}>
-            <Col span={6}>
+            <Col span={7}>
               <Button type="primary" onClick={this.isRunningOnChange}>
                 {this.state.isRunning ? '暂停' : '开始'}
               </Button>
             </Col>
-            <Col span={6}>
+            <Col span={7}>
               <div style={{ display: 'flex' }}>
                 <div>运行状态：</div>
-                {this.state.isRunning ? <Spin size="large" style={{ color: red }} /> : null}
+                {this.state.isRunning ? <Spin size="large" /> : null}
               </div>
             </Col>
-            <Col span={6}>
+            <Col span={7}>
               <Button
                 onClick={this.resetStatus}
               >
                 停止并恢复默认配置
             </Button>
             </Col>
-            <Col span={6}>
-              <a href="https://www.aliway.com/mode.php?m=o&q=browse&tab=t">查看最新帖子</a>
+            <Col span={3}>
+              <a
+                onClick={() => {
+                  // chrome.tabs.create({ url: 'https://www.aliway.com/mode.php?m=o&q=browse&tab=t' });
+                  chrome.runtime.sendMessage({ action: 'startMonitor', tid: 389388, floorSuffix: 4 });
+                }}
+              >
+                查看最新帖子
+              </a>
             </Col>
           </Row>
         </div >

@@ -1,10 +1,27 @@
 <!DOCTYPE html>
 <html>
-  <meta charset="UTF-8">
-  <head>
-    <script src="background.js"></script>
-  </head>
-  <body>
-    <iframe id="iframe1" width="1000 px" height="600 px" ></iframe>
-  </body>
+<meta charset="UTF-8">
+
+<head>
+  <script src="background.js"></script>
+</head>
+
+<body>
+  <iframe id="iframe1" width="1000 px" height="600 px"></iframe>
+
+  <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js"></script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyCZ14BJfu6Lg4UWrGa0lF0TuW4lcP4wjYM",
+      authDomain: "aliway-monitor.firebaseapp.com",
+      databaseURL: "https://aliway-monitor.firebaseio.com",
+      projectId: "aliway-monitor",
+      storageBucket: "aliway-monitor.appspot.com",
+      messagingSenderId: "773524308856"
+    };
+    firebase.initializeApp(config);
+  </script>
+</body>
+
 </html>

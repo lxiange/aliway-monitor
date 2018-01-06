@@ -6,7 +6,7 @@
     },
     "scripts": {
         "build": "atool-build src -o dist && tnpm run copy",
-        "copy": "cp {resource/*,src/{background.js,background.html,index.html,manifest.json}} dist/",
+        "copy": "cp {resource/*,src/{background.js,background.html,content_script.js,index.html,manifest.json}} dist/",
         "dev": "dora --port 8003 --plugins webpack"
     },
     "author": "lxiange",
